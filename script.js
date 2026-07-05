@@ -273,9 +273,16 @@ onload = function()
       else if(bend < 0.50) {angle = (0.5 - bend) * 2.0 * Math.PI;}
       mat.rotate(a_bMatrix[1], angle, [1.0, 0.0, 0.0], a_lMatrix[1]);// src angle axis dest
 
-      // モデルのワールド行列の生成【ここをなんとかする】
+       // モデルのワールド行列の生成【ここをなんとかする】
       a_wMatrix[0] = a_lMatrix[0];
-      a_wMatrix[1] = a_wMatrix[0];
+
+      //ワールド行列
+      mat.multiply(a_wMatrix[0], a_lMatrix[1], a_wMatrix[1]);
+
+      //回転の処理で伸びちゃうのでバインド分もどして補正
+      var invBind1 = mat.create();
+      mat.inverse(a_bMatrix[1], invBind1);
+      mat.multiply(a_wMatrix[1], invBind1, a_wMatrix[1])
 	    
       // モデル描画
       gl.useProgram(prg_skin);
@@ -338,7 +345,7 @@ onload = function()
       gl.drawElements(gl.LINES, 6, gl.UNSIGNED_SHORT, 0);
       // 次の座標系
       var m = mat.create();
-      mat.multiply(a_lMatrix[0], a_lMatrix[1], m );
+      mat.multiply(a_lMatrix[0], a_lMatrix[1], m );////////////////子ワールド計算
       gl.bindBuffer(gl.UNIFORM_BUFFER, aUBO[1]);
       gl.bufferData(gl.UNIFORM_BUFFER, m, gl.DYNAMIC_DRAW);
       gl.bindBuffer(gl.UNIFORM_BUFFER, null);
